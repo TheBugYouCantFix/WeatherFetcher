@@ -62,16 +62,6 @@ object WeatherFetcher {
             case Right(s) => Right(s)
             case Left(err) => Left(err.toString)
 
-    request
-  }
-
-  private def sendRequest(request: HttpRequest): Future[String ] = {
-    val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-    val entityFuture: Future[HttpEntity.Strict] = responseFuture.flatMap(
-      res => res.entity.toStrict(2.seconds)
-    )
-    
-    entityFuture.map(entity => entity.data.utf8String)
         case Response(Left(err), _, _, _, _, _)
         => Left(err)
         }
@@ -79,9 +69,12 @@ object WeatherFetcher {
 
 
   def main(args: Array[String]): Unit = {
-    val city = "Kazan"
-    sendRequest(
-     getWeatherByCityRequest(city) 
-    ).foreach(println)
+    val city = "Bern"
+    getWeatherByCity(city).onComplete {
+      case Success(Right(data)) => data.show()
+      case Success(Left(error)) => println(error)
+      case Failure(exception) => println(s"Request failed: ${exception.getMessage}")
+    }
+    Thread.sleep(3000)
   }
 }
