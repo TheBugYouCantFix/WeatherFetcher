@@ -22,6 +22,27 @@ case class Main(
                feels_like: Double
                )
 
+case class FullResponse(
+  weather: List[Weather],
+  wind: Wind,
+  main: Main,
+  name: String // city name
+) {
+
+  def show(): Unit = println(
+    s""" Weather in $name
+       | Description: \\u${weather.head.icon} ${weather.head.description}
+       | Temperature: ${main.temp}°C
+       | Feels like: ${main.feels_like}°C
+       | Wind speed: ${wind.speed} m/s
+       |""".stripMargin
+  )
+}
+
+implicit val weatherDecoder: Decoder[Weather] = deriveDecoder
+implicit val windDecoder: Decoder[Wind] = deriveDecoder
+implicit val mainDecoder: Decoder[Main] = deriveDecoder
+implicit val fullResponseDecoder: Decoder[FullResponse] = deriveDecoder
 
 object WeatherFetcher {
   implicit val system: ActorSystem[_] = ActorSystem(Behaviors.empty, "SprayExample")
