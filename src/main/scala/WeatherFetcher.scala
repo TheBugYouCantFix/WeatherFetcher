@@ -72,7 +72,11 @@ object WeatherFetcher {
     )
     
     entityFuture.map(entity => entity.data.utf8String)
+        case Response(Left(err), _, _, _, _, _)
+        => Left(err)
+        }
   }
+
 
   def main(args: Array[String]): Unit = {
     val city = "Kazan"
