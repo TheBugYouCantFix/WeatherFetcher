@@ -1,9 +1,10 @@
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpEntity, HttpMethod, HttpMethods, HttpRequest, HttpResponse, StatusCodes}
+import sttp.client4.*
+import io.circe.*
+import io.circe.parser.*
+import io.circe.generic.semiauto.*
 
-import scala.concurrent.ExecutionContext
+import scala.util.{Success, Failure}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
@@ -45,20 +46,21 @@ implicit val mainDecoder: Decoder[Main] = deriveDecoder
 implicit val fullResponseDecoder: Decoder[FullResponse] = deriveDecoder
 
 object WeatherFetcher {
-  implicit val system: ActorSystem[_] = ActorSystem(Behaviors.empty, "SprayExample")
-  implicit val executionContext: ExecutionContext = system.executionContext
-  import system.dispatchers
-
   private val baseUrl = "https://api.openweathermap.org"
   private val apiKey = sys.env.getOrElse("API_KEY", throw new IllegalStateException("API_KEY environment variable not set"))
+  private val backend = DefaultFutureBackend()
 
-  private def getWeatherByCityRequest(city: String): HttpRequest = {
-    val uri = s"$baseUrl/data/2.5/weather?q=$city&appid=$apiKey&units=metric"
+  private def getWeatherByCity(city: String): Future[Either[String, FullResponse]] = {
+    val uri = uri"$baseUrl/data/2.5/weather?q=$city&appid=$apiKey&units=metric"
 
-    val request = HttpRequest(
-      method = HttpMethods.GET,
-      uri = uri,
-    )
+    basicRequest
+      .get(uri)
+      .send(backend)
+      .map {
+        case Response(Right(s), _, _, _, _, _) =>
+          decode[FullResponse](s) match
+            case Right(s) => Right(s)
+            case Left(err) => Left(err.toString)
 
     request
   }
