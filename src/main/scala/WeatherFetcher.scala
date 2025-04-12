@@ -5,7 +5,22 @@ import akka.http.scaladsl.model.{HttpEntity, HttpMethod, HttpMethods, HttpReques
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import scala.concurrent.duration.*
+
+
+// The classes below represent the overall structure of the json response
+case class Weather(
+  description: String,
+  icon: String
+)
+
+case class Wind(
+               speed: Double
+               )
+
+case class Main(
+               temp: Double,
+               feels_like: Double
+               )
 
 
 object WeatherFetcher {
