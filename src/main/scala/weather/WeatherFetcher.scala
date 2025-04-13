@@ -1,11 +1,12 @@
 import sttp.client4.*
 import io.circe.*
 import io.circe.parser.*
-import io.circe.generic.semiauto.*
-import utils.WeatherIcons
-import zio.{Task, ZIO, ZIOAppArgs, ZIOAppDefault, ZLayer}
-import zio.cli.{Args, Options, CliApp, Command, HelpDoc, ZIOCliDefault}
+
+import sttp.client4.*
+
 import zio.cli.HelpDoc.Span.text
+import zio.cli.*
+import zio.{Task, ZIO, ZIOAppArgs}
 
 import scala.util.{Either, Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
