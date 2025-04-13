@@ -27,7 +27,7 @@ case class FullResponse(
 
   def show(): Unit = println(
     s""" ${name.capitalize} ${WeatherIcons(weather.head.icon)}
-       | ${main.temp.round}°C ${weather.head.description}
+       | ${main.temp.round}°C, ${weather.head.description}
        | Feels like: ${main.feels_like.round}°C
        | Wind speed: ${wind.speed.round} m/s
        |""".stripMargin
