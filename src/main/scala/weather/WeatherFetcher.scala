@@ -9,45 +9,11 @@ import zio.cli.HelpDoc.Span.text
 import zio.cli.*
 import zio.{Task, ZIO, ZIOAppArgs}
 
-import scala.util.{Either, Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// The classes below represent the overall structure of the json response
-case class Weather(
-  description: String,
-  icon: String
-)
-
-case class Wind(
-               speed: Double
-               )
-
-case class Main(
-               temp: Double,
-               feels_like: Double
-               )
-
-case class FullResponse(
-  weather: List[Weather],
-  wind: Wind,
-  main: Main,
-  name: String // city name
-) {
-
-  def show(): Unit = println(
-    s""" ${name.capitalize} ${WeatherIcons(weather.head.icon)}
-       | ${main.temp.round}°C ${weather.head.description}
-       | Feels like: ${main.feels_like.round}°C
-       | Wind speed: ${wind.speed.round} m/s
-       |""".stripMargin
-  )
-}
-
-implicit val weatherDecoder: Decoder[Weather] = deriveDecoder
-implicit val windDecoder: Decoder[Wind] = deriveDecoder
-implicit val mainDecoder: Decoder[Main] = deriveDecoder
-implicit val fullResponseDecoder: Decoder[FullResponse] = deriveDecoder
+import weather.model.FullResponse
+import weather.model.JsonCodecs.*
 
 private object WeatherFetcher extends ZIOCliDefault {
   private val baseUrl = "https://api.openweathermap.org"
@@ -96,5 +62,4 @@ private object WeatherFetcher extends ZIOCliDefault {
   ) {
     city => showWeather(city)
   }
-
 }
