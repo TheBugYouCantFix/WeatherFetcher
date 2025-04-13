@@ -2,6 +2,10 @@ import sttp.client4.*
 import io.circe.*
 import io.circe.parser.*
 import io.circe.generic.semiauto.*
+import utils.WeatherIcons
+import zio.{Task, ZIO, ZIOAppArgs, ZIOAppDefault, ZLayer}
+import zio.cli.{Args, Options, CliApp, Command, HelpDoc, ZIOCliDefault}
+import zio.cli.HelpDoc.Span.text
 
 import scala.util.{Success, Failure}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -67,13 +71,12 @@ object WeatherFetcher {
   }
 
 
-  def main(args: Array[String]): Unit = {
-    val city = "Bern"
-    getWeatherByCity(city).onComplete {
-      case Success(Right(data)) => data.show()
-      case Success(Left(error)) => println(error)
-      case Failure(exception) => println(s"Request failed: ${exception.getMessage}")
-    }
-    Thread.sleep(3000)
+  def showWeather(city: String): Task[Unit] = {
+    ZIO
+      .fromFuture(_ => getWeatherByCity(city))
+      .map {
+        case Right(data) => data.show()
+        case Left(error) => println(error)
+      }
   }
 }
