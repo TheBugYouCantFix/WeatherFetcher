@@ -1,13 +1,21 @@
 package weather
 
-import zio.ZIOAppArgs
+import zio.{Task, ZIO, ZIOAppArgs}
 import zio.cli.*
 import zio.cli.HelpDoc.Span.text
-
 import weather.service.WeatherFetcher
 
 
 object WeatherFetcherApp extends ZIOCliDefault {
+  private def showWeather(city: String): Task[Unit] = {
+    ZIO
+      .fromFuture(_ => WeatherFetcher.getWeatherByCity(city))
+      .map {
+        case Right(data) => data.show()
+        case Left(error) => println(error)
+      }
+  }
+
   val arguments: Args[String] = Args.text("city")
   private val help: HelpDoc = HelpDoc.p("Shows weather for a given city")
 
@@ -20,5 +28,5 @@ object WeatherFetcherApp extends ZIOCliDefault {
     version = "1.0.0",
     summary = text("A tool for fetching weather info for a given city"),
     command = weatherCommand
-  ) (WeatherFetcher.showWeather)
+  ) (showWeather)
 }
