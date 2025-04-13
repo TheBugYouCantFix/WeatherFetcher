@@ -7,7 +7,6 @@ import scala.util.{Success, Failure}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
 // The classes below represent the overall structure of the json response
 case class Weather(
   description: String,
@@ -32,7 +31,7 @@ case class FullResponse(
 
   def show(): Unit = println(
     s""" Weather in $name
-       | Description: \\u${weather.head.icon} ${weather.head.description}
+       | Description: ${WeatherIcons(weather.head.icon)} ${weather.head.description}
        | Temperature: ${main.temp}°C
        | Feels like: ${main.feels_like}°C
        | Wind speed: ${wind.speed} m/s
