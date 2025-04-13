@@ -7,7 +7,7 @@ import zio.{Task, ZIO, ZIOAppArgs, ZIOAppDefault, ZLayer}
 import zio.cli.{Args, Options, CliApp, Command, HelpDoc, ZIOCliDefault}
 import zio.cli.HelpDoc.Span.text
 
-import scala.util.{Success, Failure}
+import scala.util.{Either, Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -34,11 +34,10 @@ case class FullResponse(
 ) {
 
   def show(): Unit = println(
-    s""" Weather in $name
-       | Description: ${WeatherIcons(weather.head.icon)} ${weather.head.description}
-       | Temperature: ${main.temp}°C
-       | Feels like: ${main.feels_like}°C
-       | Wind speed: ${wind.speed} m/s
+    s""" ${name.capitalize} ${WeatherIcons(weather.head.icon)}
+       | ${main.temp.round}°C ${weather.head.description}
+       | Feels like: ${main.feels_like.round}°C
+       | Wind speed: ${wind.speed.round} m/s
        |""".stripMargin
   )
 }
@@ -48,7 +47,7 @@ implicit val windDecoder: Decoder[Wind] = deriveDecoder
 implicit val mainDecoder: Decoder[Main] = deriveDecoder
 implicit val fullResponseDecoder: Decoder[FullResponse] = deriveDecoder
 
-object WeatherFetcher {
+private object WeatherFetcher extends ZIOCliDefault {
   private val baseUrl = "https://api.openweathermap.org"
   private val apiKey = sys.env.getOrElse("API_KEY", throw new IllegalStateException("API_KEY environment variable not set"))
   private val backend = DefaultFutureBackend()
@@ -67,7 +66,7 @@ object WeatherFetcher {
 
         case Response(Left(err), _, _, _, _, _)
         => Left(err)
-        }
+      }
   }
 
 
@@ -79,4 +78,21 @@ object WeatherFetcher {
         case Left(error) => println(error)
       }
   }
+
+  val arguments: Args[String] = Args.text("city")
+  private val help: HelpDoc = HelpDoc.p("Shows weather for a given city")
+
+  private val weatherCommand: Command[String] =
+    Command("weather", args = arguments)
+      .withHelp(help)
+
+  val cliApp: CliApp[ZIOAppArgs, Throwable, Unit] = CliApp.make(
+    name = "WeatherFetcher",
+    version = "1.0.0",
+    summary = text("A tool for fetching weather info for a given city"),
+    command = weatherCommand
+  ) {
+    city => showWeather(city)
+  }
+
 }
