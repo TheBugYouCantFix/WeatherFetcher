@@ -1,4 +1,5 @@
-import sttp.client4.*
+package weather
+
 import io.circe.*
 import io.circe.parser.*
 

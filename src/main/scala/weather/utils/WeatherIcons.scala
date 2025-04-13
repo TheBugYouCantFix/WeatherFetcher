@@ -1,4 +1,4 @@
-package utils
+package weather.utils
 
 // AI generated
 object WeatherIcons {
